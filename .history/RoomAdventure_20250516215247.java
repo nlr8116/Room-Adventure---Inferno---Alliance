@@ -54,53 +54,37 @@ public class RoomAdventure {                                           // Main c
     }
     private static void setupGame(){
         // Hanger Bay
-        Room hangerBay = new Room("Hanger Bay");                            // Create hanger bay
+        Room room1 = new Room("Hanger Bay");                            // Create hanger bay
         Room controlroom = new Room("Control Room");                            // Create control room
-        Room powercore = new Room("Power Core");                            // Create power core
 
-        String[] hangerBayExitDirections = {"east"} ;                        // Set exit directions for hanger bay
-        Room[] hangerBayExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
-        String[] hangerBayItems = {"Tie Fighter", "Mouse Droid"};                         // Set items in hanger bay
-        String[] hangerBayItemDescriptions = {                               // Set item descriptions for hanger bay
-            "An Imperial Tie Fighter", "A small mouse droid."
+        String[] room1ExitDirections = {"east"} ;                        // Set exit directions for hanger bay
+        Room[] room1ExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
+        String[] room1Items = {"desk", "chair"};                         // Set items in hanger bay
+        String[] room1ItemDescriptions = {                               // Set item descriptions for hanger bay
+            "A wooden desk.", "A comfortable chair."
         }; 
-        String[] hangerBayGrabbables = {"blaster"};                             // Set grabbables for hanger bay
-        hangerBay.setExitDirections(hangerBayExitDirections);                   // Set exit directions for hanger bay
-        hangerBay.setExitDestinations(hangerBayExitDestinations);               // Set exit destinations for hanger bay
-        hangerBay.setItems(hangerBayItems);                                     // Set items for hanger bay
-        hangerBay.setItemDescriptions(hangerBayItemDescriptions);               // Set item descriptions for hanger bay
-        hangerBay.setGrabbables(hangerBayGrabbables);                           // Set grabbables for hanger bay
+        String[] room1Grabbables = {"key"};                             // Set grabbables for hanger bay
+        room1.setExitDirections(room1ExitDirections);                   // Set exit directions for hanger bay
+        room1.setExitDestinations(room1ExitDestinations);               // Set exit destinations for hanger bay
+        room1.setItems(room1Items);                                     // Set items for hanger bay
+        room1.setItemDescriptions(room1ItemDescriptions);               // Set item descriptions for hanger bay
+        room1.setGrabbables(room1Grabbables);                           // Set grabbables for hanger bay
 
         // Control Room
         String[] controlroomExitDirections = {"west"};                        // Set exit directions for control room
-        Room[] controlroomExitDestinations = {hangerBay};                         // Set exit directions and destinations for control room
-        String[] controlroomItems = {"Computer Terminals", "ID Card", "Targeting Screens"};             // Set items in control room
+        Room[] controlroomExitDestinations = {room1};                         // Set exit directions and destinations for control room
+        String[] controlroomItems = {"fireplace", "book", "rug"};             // Set items in control room
         String[] controlroomItemDescriptions = {                              // Set item descriptions for control room
-            "A large terminal that controls the Death Star.", "An ID card that gets you into the Powercore", "A targeting screen that shows the Death Star's target."
+            "A cozy fireplace.", "An old book.", "A soft rug."
         };
-        String[] controlroomGrabbables = {"ID Card"};                            // Set grabbables for control room
+        String[] controlroomGrabbables = {"book"};                            // Set grabbables for control room
         controlroom.setExitDirections(controlroomExitDirections);                   // Set exit directions for control room
         controlroom.setExitDestinations(controlroomExitDestinations);               // Set exit destinations for control room
         controlroom.setItems(controlroomItems);                                     // Set items for control room
         controlroom.setItemDescriptions(controlroomItemDescriptions);               // Set item descriptions for control room
         controlroom.setGrabbables(controlroomGrabbables);                           // Set grabbables for control room
 
-        // Power Core
-        String[] powercoreExitDirections = {"south"};                        // Set exit directions for power core
-        Room[] powercoreExitDestinations = {controlroom};                         // Set exit directions and destinations for power core
-        String[] powercoreItems = {"Power Core", "Death Star Plans"};             // Set items in power core       
-        String[] powercoreItemDescriptions = {                              // Set item descriptions for power core
-            "The power core of the Death Star.", "The plans to destroy the Death Star."
-        };
-
-        String[] powercoreGrabbables = {"Death Star Plans"};                     // Set grabbables for power core
-        powercore.setExitDirections(powercoreExitDirections);                   // Set exit directions for power core
-        powercore.setExitDestinations(powercoreExitDestinations);               // Set exit destinations for power core
-        powercore.setItems(powercoreItems);                                     // Set items for power core
-        powercore.setItemDescriptions(powercoreItemDescriptions);               // Set item descriptions for power core
-        powercore.setGrabbables(powercoreGrabbables);                           // Set grabbables for power core
-        
-        currentRoom = hangerBay;                                            // Set starting room to Hanger Bay
+        currentRoom = room1;                                            // Set starting room to Hanger Bay
     }
 
     @SuppressWarnings("java:S2189")

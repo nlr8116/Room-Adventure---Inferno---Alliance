@@ -89,17 +89,6 @@ public class RoomAdventure {                                           // Main c
         String[] powercoreExitDirections = {"south"};                        // Set exit directions for power core
         Room[] powercoreExitDestinations = {controlroom};                         // Set exit directions and destinations for power core
         String[] powercoreItems = {"Power Core", "Death Star Plans"};             // Set items in power core       
-        String[] powercoreItemDescriptions = {                              // Set item descriptions for power core
-            "The power core of the Death Star.", "The plans to destroy the Death Star."
-        };
-
-        String[] powercoreGrabbables = {"Death Star Plans"};                     // Set grabbables for power core
-        powercore.setExitDirections(powercoreExitDirections);                   // Set exit directions for power core
-        powercore.setExitDestinations(powercoreExitDestinations);               // Set exit destinations for power core
-        powercore.setItems(powercoreItems);                                     // Set items for power core
-        powercore.setItemDescriptions(powercoreItemDescriptions);               // Set item descriptions for power core
-        powercore.setGrabbables(powercoreGrabbables);                           // Set grabbables for power core
-        
         currentRoom = hangerBay;                                            // Set starting room to Hanger Bay
     }
 
