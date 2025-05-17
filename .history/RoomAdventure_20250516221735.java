@@ -98,8 +98,6 @@ public class RoomAdventure {                                           // Main c
         powercore.setExitDestinations(powercoreExitDestinations);               // Set exit destinations for power core
         powercore.setItems(powercoreItems);                                     // Set items for power core
         powercore.setItemDescriptions(powercoreItemDescriptions);               // Set item descriptions for power core
-        powercore.setGrabbables(powercoreGrabbables);                           // Set grabbables for power core
-        
         currentRoom = hangerBay;                                            // Set starting room to Hanger Bay
     }
 
