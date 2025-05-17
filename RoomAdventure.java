@@ -12,14 +12,29 @@ public class RoomAdventure {                                           // Main c
     // Default error message
     "Sorry, I do not understand, Try [verb] [noun]. Valid verbs include  'go', 'look', and 'take'.";
 
-
+    public static int findElement(String[] list, String element){
+        if(list == null){
+            return -1;
+        }
+        
+        for (int i = 0; i < list.length; i++) {                       // Loop through the list
+            if (list[i] != null && list[i].equals(element)) {          // Check if element matches
+                return i;                                              // Return index if found
+            }
+        }
+        return -1;                                                     // Return -1 if not found
+    }
 
     private static void handleGo(String noun) {
         String[] exitDirections = currentRoom.getExitDirections();      // Get available exit directions
         Room[] exitDestinations = currentRoom.getExitDestinations();    // Get corresponding room objects  
         status = "I don't see that room.";                              // Default if direction not found
         for (int i = 0; i < exitDirections.length; i++) {               // Loop through exit directions
-            if (noun.equals(exitDirections[i])) {                       // if direction matches
+            if (noun.equals(exitDirections[i])) {                    // if direction matches
+                if(exitDestinations[i].getName() == "Power Core" && findElement(inventory, "ID-Card") == -1){ // If trying to enter the power core without the ID card then they are locked out
+                    status = "You do not have the ID card Required to enter the Power Core.";
+                    break;
+                }
                 currentRoom = exitDestinations[i];                      // Move to the new room
                 status = "Changed Room";                                // Update status 
             }
@@ -42,6 +57,10 @@ public class RoomAdventure {                                           // Main c
         status = "I can't grab that.";                                  // Default if not grabbable
         for (String item : grabbables) {                                // Loop through grabbables
             if (noun.equals(item)) {                                    // If user noun matches a grabbable item
+                if(item == "Death-Star-Plans" && findElement(inventory, "Maintenance-Tools") == -1){ // If trying to take the death star plans without the maintenance tools then they are blocked
+                    status = "You do not have the Tools Required to take the Death Star Plans.";
+                    break;
+                }
                 for (int j = 0; j < inventory.length; j++) {            // Loop through inventory
                     if (inventory[j] == null) {                         // If empty slot found
                         inventory[j] = item;                            // Add item to inventory
@@ -52,17 +71,19 @@ public class RoomAdventure {                                           // Main c
             }
         }
     }
+
     private static void setupGame(){
         // Hanger Bay
         Room hangerBay = new Room("Hanger Bay");                            // Create hanger bay
         Room controlroom = new Room("Control Room");                            // Create control room
         Room powercore = new Room("Power Core");                            // Create power core
+        Room maintenance = new Room("Maintenance");                       // Create maintenance room
 
-        String[] hangerBayExitDirections = {"east"} ;                        // Set exit directions for hanger bay
+        String[] hangerBayExitDirections = {"north"} ;                        // Set exit directions for hanger bay
         Room[] hangerBayExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
-        String[] hangerBayItems = {"Tie Fighter", "Mouse Droid"};                         // Set items in hanger bay
+        String[] hangerBayItems = {"Tie-Fighter", "Mouse-Droid"};                         // Set items in hanger bay
         String[] hangerBayItemDescriptions = {                               // Set item descriptions for hanger bay
-            "An Imperial Tie Fighter", "A small mouse droid."
+            "An Imperial Tie Fighter, might be good on the way out.", "A small mouse droid."
         }; 
         String[] hangerBayGrabbables = {"blaster"};                             // Set grabbables for hanger bay
         hangerBay.setExitDirections(hangerBayExitDirections);                   // Set exit directions for hanger bay
@@ -72,13 +93,13 @@ public class RoomAdventure {                                           // Main c
         hangerBay.setGrabbables(hangerBayGrabbables);                           // Set grabbables for hanger bay
 
         // Control Room
-        String[] controlroomExitDirections = {"west"};                        // Set exit directions for control room
-        Room[] controlroomExitDestinations = {hangerBay};                         // Set exit directions and destinations for control room
-        String[] controlroomItems = {"Computer Terminals", "ID Card", "Targeting Screens"};             // Set items in control room
+        String[] controlroomExitDirections = {"north", "east", "south"};                        // Set exit directions for control room
+        Room[] controlroomExitDestinations = {powercore, maintenance, hangerBay};                         // Set exit directions and destinations for control room
+        String[] controlroomItems = {"Computer-Terminals", "ID-Card", "Targeting-Screens"};             // Set items in control room
         String[] controlroomItemDescriptions = {                              // Set item descriptions for control room
             "A large terminal that controls the Death Star.", "An ID card that gets you into the Powercore", "A targeting screen that shows the Death Star's target."
         };
-        String[] controlroomGrabbables = {"ID Card"};                            // Set grabbables for control room
+        String[] controlroomGrabbables = {"ID-Card"};                               // Set grabbables for control room
         controlroom.setExitDirections(controlroomExitDirections);                   // Set exit directions for control room
         controlroom.setExitDestinations(controlroomExitDestinations);               // Set exit destinations for control room
         controlroom.setItems(controlroomItems);                                     // Set items for control room
@@ -88,19 +109,34 @@ public class RoomAdventure {                                           // Main c
         // Power Core
         String[] powercoreExitDirections = {"south"};                        // Set exit directions for power core
         Room[] powercoreExitDestinations = {controlroom};                         // Set exit directions and destinations for power core
-        String[] powercoreItems = {"Power Core", "Death Star Plans"};             // Set items in power core       
+        String[] powercoreItems = {"Power-Core", "Death-Star-Plans"};             // Set items in power core       
         String[] powercoreItemDescriptions = {                              // Set item descriptions for power core
-            "The power core of the Death Star.", "The plans to destroy the Death Star."
+            "The power core of the Death Star.", "The plans to destroy the Death Star. can be stolen with the proper tools"
         };
 
-        String[] powercoreGrabbables = {"Death Star Plans"};                     // Set grabbables for power core
+        String[] powercoreGrabbables = {"Death-Star-Plans"};                    // Set grabbables for power core
         powercore.setExitDirections(powercoreExitDirections);                   // Set exit directions for power core
         powercore.setExitDestinations(powercoreExitDestinations);               // Set exit destinations for power core
         powercore.setItems(powercoreItems);                                     // Set items for power core
         powercore.setItemDescriptions(powercoreItemDescriptions);               // Set item descriptions for power core
         powercore.setGrabbables(powercoreGrabbables);                           // Set grabbables for power core
         
-        currentRoom = hangerBay;                                            // Set starting room to Hanger Bay
+        // Maintenance
+        String[] maintenanceExitDirections = {"west"};                          // Set exit directions for maintenance
+        Room[] maintenanceExitDestinations = {controlroom};                     // Set exit directions and destinations for maintenance
+        String[] maintenanceItems = {"Maintenance-Droids", "Maintenance-Tools"};// Set items in maintenance
+        String[] maintenanceItemDescriptions = {                                // Set item descriptions for maintenance
+            "A group of maintenance droids.", "A set of tools for repairing or destroying the Death Star."
+        };
+        String[] maintenanceGrabbables = {"Maintenance-Tools"};                 // Set grabbables for maintenance
+        maintenance.setExitDirections(maintenanceExitDirections);               // Set exit directions for maintenance
+        maintenance.setExitDestinations(maintenanceExitDestinations);           // Set exit destinations for maintenance
+        maintenance.setItems(maintenanceItems);                                 // Set items for maintenance
+        maintenance.setItemDescriptions(maintenanceItemDescriptions);           // Set item descriptions for maintenance
+        maintenance.setGrabbables(maintenanceGrabbables);                       // Set grabbables for maintenance
+
+        // Set up the game
+        currentRoom = hangerBay;                                          
     }
 
     @SuppressWarnings("java:S2189")
@@ -108,6 +144,11 @@ public class RoomAdventure {                                           // Main c
         setupGame(); // Initialize game setup
 
         while (true) { 
+            if(findElement(inventory, "Death-Star-Plans") != -1 && currentRoom.getName() == "Hanger Bay"){     // If the player has the death star plans are are in the Hanger Bay then they win
+                System.out.println("\nYou have the Death Star Plans! \nYou dash out of the Death Star with the plans bringing them to the rebels. \nThey band together and go blow up the Death star, defeating the Empire!");
+                break;
+            }
+            
             System.out.print(currentRoom.toString());                   // Print current room
             System.out.print("\nInventory: ");                        // Print inventory
             for (int i = 0; i < inventory.length; i++) {                // Loop through inventory slots
@@ -140,12 +181,10 @@ public class RoomAdventure {                                           // Main c
                     status = DEFAULT_STATUS;                            // Set default status for invalid command
             }
 
-            System.out.println(status);                                 // Print status message
+            System.out.println("\n" + status);                                 // Print status message
         }
     }
 }
-
-
 
 
 class Room {                            // Represents a game room
@@ -158,6 +197,9 @@ class Room {                            // Represents a game room
 
     public Room (String name) {         // Constructor
         this.name = name;               // Set the room name
+    }
+    public String getName() {
+        return name;                   // Getter for room name
     }
 
     public void setExitDirections(String[] exitDirections) {    // Setter for exits
