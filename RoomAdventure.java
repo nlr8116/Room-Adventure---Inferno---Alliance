@@ -6,7 +6,11 @@ public class RoomAdventure {                                           // Main c
     private static Room currentRoom;                                    // The room the player is currently in
     private static String[] inventory = {null, null, null, null, null}; // Player inventory slots
     private static String status;                                       // Message to display after each selection 
-
+    private static long Time(){
+        return System.currentTimeMillis() / 1000 / 60 ;                              // Returns the current time in milliseconds
+    }
+    private static long endTime = Time() + 5;                               // Timer to track game time
+    
     // constants
     final private static String DEFAULT_STATUS =                        
     // Default error message
@@ -142,13 +146,25 @@ public class RoomAdventure {                                           // Main c
     @SuppressWarnings("java:S2189")
     public static void main(String[] args) {
         setupGame(); // Initialize game setup
+        System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
+        Scanner ts = new Scanner(System.in);
+        String tstring = ts.nextLine();
+
+
 
         while (true) { 
             if(findElement(inventory, "Death-Star-Plans") != -1 && currentRoom.getName() == "Hanger Bay"){     // If the player has the death star plans are are in the Hanger Bay then they win
-                System.out.println("\nYou have the Death Star Plans! \nYou dash out of the Death Star with the plans bringing them to the rebels. \nThey band together and go blow up the Death star, defeating the Empire!");
+                System.out.println("\nYou have the Death Star Plans! \nYou fly out of the Death Star in a Tie-Fighter with the plans bringing them to the rebels. \nThey band together and go blow up the Death star, defeating the Empire!");
                 break;
             }
-            
+            if (tstring.equals("y")) { // If the user wants to play with a countdown timer
+                System.out.println((endTime - Time()) + " Minutes remaining"); // Print the current time in minutes
+                if (endTime - Time() <= 0) {                               // If time is up
+                    System.out.println("You have run out of time! The Death Star is ready to blow up your planet.");       // Print game over message
+                    break;                                                  // Exit game loop
+                }
+            }
+
             System.out.print(currentRoom.toString());                   // Print current room
             System.out.print("\nInventory: ");                        // Print inventory
             for (int i = 0; i < inventory.length; i++) {                // Loop through inventory slots
