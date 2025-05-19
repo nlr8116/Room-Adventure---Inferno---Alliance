@@ -75,6 +75,24 @@ public class RoomAdventure {                                           // Main c
             }
         }
     }
+    private static void handleUse(String noun) {
+    if (noun.equals("blaster") && findElement(inventory, "blaster") != -1) {
+        if (currentRoom.getName().equals("Power Core")) {
+            System.out.println("\nYou raise your blaster and fire directly into the Power Core...");
+            System.out.println("The core destabilizes. Warning sirens blare.");
+            System.out.println("As explosions erupt around you, you smile knowing the Death Star will fall.");
+            System.out.println("\nCUTSCENE: You sacrificed your life to destroy the Death Star.");
+            System.out.println("The rebels pick up the debris and cheer your bravery.\n");
+            System.out.println("GAME OVER - SACRIFICE ENDING");
+            System.exit(0); // Ends the game
+        } else {
+            status = "You can only use the blaster in the Power Core.";
+        }
+    } else {
+        status = "You can't use that item.";
+        }
+    }
+
 
     private static void setupGame(){
         // Hanger Bay
@@ -82,6 +100,7 @@ public class RoomAdventure {                                           // Main c
         Room controlroom = new Room("Control Room");                            // Create control room
         Room powercore = new Room("Power Core");                            // Create power core
         Room maintenance = new Room("Maintenance");                       // Create maintenance room
+        Room armory = new Room("Armory");                                 // Create armory room
 
         String[] hangerBayExitDirections = {"north"} ;                        // Set exit directions for hanger bay
         Room[] hangerBayExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
@@ -97,8 +116,8 @@ public class RoomAdventure {                                           // Main c
         hangerBay.setGrabbables(hangerBayGrabbables);                           // Set grabbables for hanger bay
 
         // Control Room
-        String[] controlroomExitDirections = {"north", "east", "south"};                        // Set exit directions for control room
-        Room[] controlroomExitDestinations = {powercore, maintenance, hangerBay};                         // Set exit directions and destinations for control room
+        String[] controlroomExitDirections = {"north", "east", "south", "west"};                        // Set exit directions for control room
+        Room[] controlroomExitDestinations = {powercore, maintenance, hangerBay, armory};                         // Set exit directions and destinations for control room
         String[] controlroomItems = {"Computer-Terminals", "ID-Card", "Targeting-Screens"};             // Set items in control room
         String[] controlroomItemDescriptions = {                              // Set item descriptions for control room
             "A large terminal that controls the Death Star.", "An ID card that gets you into the Powercore", "A targeting screen that shows the Death Star's target."
@@ -139,6 +158,19 @@ public class RoomAdventure {                                           // Main c
         maintenance.setItemDescriptions(maintenanceItemDescriptions);           // Set item descriptions for maintenance
         maintenance.setGrabbables(maintenanceGrabbables);                       // Set grabbables for maintenance
 
+        // Armory
+        String[] armoryExitDirections = {"east"};
+        Room[] armoryExitDestinations = {controlroom};
+        String[] armoryItems = {"blaster"};
+        String[] armoryItemDescriptions = {"A powerful blaster capable of destroying vital systems."};
+        String[] armoryGrabbables = {"blaster"};
+
+        armory.setExitDirections(armoryExitDirections);
+        armory.setExitDestinations(armoryExitDestinations);
+        armory.setItems(armoryItems);
+        armory.setItemDescriptions(armoryItemDescriptions);
+        armory.setGrabbables(armoryGrabbables);
+
         // Set up the game
         currentRoom = hangerBay;                                          
     }
@@ -146,7 +178,7 @@ public class RoomAdventure {                                           // Main c
     @SuppressWarnings("java:S2189")
     public static void main(String[] args) {
         setupGame(); // Initialize game setup
-        System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
+        System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'. You can use a specifc item by typing 'use [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
         Scanner ts = new Scanner(System.in);
         String tstring = ts.nextLine();
 
@@ -192,6 +224,9 @@ public class RoomAdventure {                                           // Main c
                     break;
                 case "take":                                            // If verb is "take"
                     handleTake(noun);                                   // Call method to handle taking items
+                    break;
+                case "use":                                             // If verb is "use"
+                    handleUse(noun);                                    // Call method to handle using items
                     break;
                 default:                                                // Invalid command
                     status = DEFAULT_STATUS;                            // Set default status for invalid command
