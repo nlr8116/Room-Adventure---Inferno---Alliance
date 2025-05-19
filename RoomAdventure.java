@@ -75,9 +75,15 @@ public class RoomAdventure {                                           // Main c
             }
         }
     }
+<<<<<<< HEAD
     private static void handleUse(String noun) {
     if (noun.equals("blaster") && findElement(inventory, "blaster") != -1) {
         if (currentRoom.getName().equals("Power Core")) {
+=======
+    private static void handleUse(String noun) {                                                                             //Handles using the blaster
+    if (noun.equals("blaster") && findElement(inventory, "blaster") != -1) {                                // Check if the blaster is in inventory
+        if (currentRoom.getName().equals("Power Core")) {                                                           //check if they are in the power core
+>>>>>>> 6d22fa843313ade1a50db83e2c143fec5475655f
             System.out.println("\nYou raise your blaster and fire directly into the Power Core...");
             System.out.println("The core destabilizes. Warning sirens blare.");
             System.out.println("As explosions erupt around you, you smile knowing the Death Star will fall.");
@@ -89,7 +95,11 @@ public class RoomAdventure {                                           // Main c
             status = "You can only use the blaster in the Power Core.";
         }
     } else {
+<<<<<<< HEAD
         status = "You can't use that item.";
+=======
+        status = "You can't use that item ,";
+>>>>>>> 6d22fa843313ade1a50db83e2c143fec5475655f
         }
     }
 
@@ -159,6 +169,7 @@ public class RoomAdventure {                                           // Main c
         maintenance.setGrabbables(maintenanceGrabbables);                       // Set grabbables for maintenance
 
         // Armory
+<<<<<<< HEAD
         String[] armoryExitDirections = {"east"};
         Room[] armoryExitDestinations = {controlroom};
         String[] armoryItems = {"blaster"};
@@ -170,6 +181,19 @@ public class RoomAdventure {                                           // Main c
         armory.setItems(armoryItems);
         armory.setItemDescriptions(armoryItemDescriptions);
         armory.setGrabbables(armoryGrabbables);
+=======
+        String[] armoryExitDirections = {"east"};                                                              // Set exit directions for armory   
+    Room[] armoryExitDestinations = {controlroom};                                                             // Set exit directions and destinations for armory                    
+        String[] armoryItems = {"blaster"};                                                                    // Set items in armory
+        String[] armoryItemDescriptions = {"A powerful blaster capable of destroying vital systems."};         // Set item descriptions for armory
+        String[] armoryGrabbables = {"blaster"};                                                               // Set grabbables for armory 
+
+        armory.setExitDirections(armoryExitDirections);                                                        // Set exit directions for armory
+        armory.setExitDestinations(armoryExitDestinations);                                                    // Set exit destinations for armory    
+        armory.setItems(armoryItems);                                                                          // Set items for armory 
+        armory.setItemDescriptions(armoryItemDescriptions);                                                    // Set item descriptions for armory    
+        armory.setGrabbables(armoryGrabbables);                                                                // Set grabbables for armory
+>>>>>>> 6d22fa843313ade1a50db83e2c143fec5475655f
 
         // Set up the game
         currentRoom = hangerBay;                                          
@@ -178,7 +202,11 @@ public class RoomAdventure {                                           // Main c
     @SuppressWarnings("java:S2189")
     public static void main(String[] args) {
         setupGame(); // Initialize game setup
+<<<<<<< HEAD
         System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'. You can use a specifc item by typing 'use [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
+=======
+        System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'.\n You can use a specific items with 'Use [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
+>>>>>>> 6d22fa843313ade1a50db83e2c143fec5475655f
         Scanner ts = new Scanner(System.in);
         String tstring = ts.nextLine();
 
