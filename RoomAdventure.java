@@ -5,8 +5,8 @@ public class RoomAdventure {                                           // Main c
     // class variables
     private static Room currentRoom;                                    // The room the player is currently in
     private static String[] inventory = {null, null, null, null, null}; // Player inventory slots
-    private static String status;
-    private static Boolean isRunning = true;                                       // Message to display after each selection 
+    private static String status;                                                  // Message to display after each selection
+    private static Boolean isRunning = true;                                       // boolean that controls game loop
     private static long Time(){
         return System.currentTimeMillis() / 1000 / 60 ;                              // Returns the current time in milliseconds
     }
@@ -15,9 +15,9 @@ public class RoomAdventure {                                           // Main c
     // constants
     final private static String DEFAULT_STATUS =                        
     // Default error message
-    "Sorry, I do not understand, Try [verb] [noun]. Valid verbs include  'go', 'look', and 'take'.";
+    "Sorry, I do not understand, Try [verb] [noun]. Valid verbs include  'go', 'look', and 'take'. If you wish to not play anymore type 'quit game'.";
 
-    public static int findElement(String[] list, String element){
+    public static int findElement(String[] list, String element){       //Funtion that looks for an alement in a array and reutrn its index or -1 if not in array
         if(list == null){
             return -1;
         }
@@ -49,7 +49,7 @@ public class RoomAdventure {                                           // Main c
                     }
 
                     if (!hasItem) {
-                        status = "You need the " + requiredItem + " to go " + noun + ".";
+                        status = "Your locked in. You need the " + requiredItem + " to go anywhere from here.";
                         return; // Don't allow movement
                     }
                 }
@@ -94,8 +94,8 @@ public class RoomAdventure {                                           // Main c
         }
     }
 
-    private static void handleQuit(String verb){
-        System.out.println("Goodbye");
+    private static void handleQuit(String noun){
+        status = "The resistance lost without you. Goodbye";
         isRunning = false;
     }
 
@@ -119,30 +119,31 @@ public class RoomAdventure {                                           // Main c
 
 
     private static void setupGame(){
-        Room office = new Room("Moff's Office");
-        // Hanger Bay
+        Room office = new Room("Moff's Office");                            //Creat Moff's office
         Room hangerBay = new Room("Hanger Bay");                            // Create hanger bay
         Room controlroom = new Room("Control Room");                            // Create control room
         Room powercore = new Room("Power Core");                            // Create power core
         Room maintenance = new Room("Maintenance");                       // Create maintenance room
         Room armory = new Room("Armory");                                 // Create armory room
-
-        String[] officeExitDirections = {"west"};
-        Room[] officeExitDestinations = {hangerBay};
-        String[] officrequiredItems = {"key-card", "com-link"};
-        String[] officeItems = {"desk", "chair"};
-        String[] officeItemDecriptions = {
-            "A Key-card on the Desk. It gives access to the hangar bay", "A Com-link on the Chair. I can contact the Rebel Fleet!"
-        };
-        String[] officeGrabbables = {"key-card", "com-link"};
         
-        office.setExitDirections(officeExitDirections);
-        office.setExitDestinations(officeExitDestinations);
-        office.setRequiredItems(officrequiredItems);
-        office.setItems(officeItems);
-        office.setItemDescriptions(officeItemDecriptions);
-        office.setGrabbables(officeGrabbables);
+        //Office
+        String[] officeExitDirections = {"west"};                               // Set Exit directions for Office
+        Room[] officeExitDestinations = {hangerBay};                            // Set Exit Destinations for Office
+        String[] officrequiredItems = {"key-card"};                             // Set required items for Office
+        String[] officeItems = {"desk", "chair"};                               // Set items for Office
+        String[] officeItemDecriptions = {
+            "A Key-card on the Desk. It could get you out of this office.", "A Com-link on the Chair. I can contact the Rebel Fleet!"       // Set Item descriptions for Office
+        };
+        String[] officeGrabbables = {"key-card", "com-link"};                   // Set grabbables for Office
+        
+        office.setExitDirections(officeExitDirections);                         // Set Exit directions for Office
+        office.setExitDestinations(officeExitDestinations);                     // Set Exit Destinations for Office
+        office.setRequiredItems(officrequiredItems);                            // Set required items for Office
+        office.setItems(officeItems);                                           // Set items for Office
+        office.setItemDescriptions(officeItemDecriptions);                      // Set Item descriptions for Office
+        office.setGrabbables(officeGrabbables);                                 // Set grabbables for Office
 
+        //Hanger Bay
         String[] hangerBayExitDirections = {"north", "east"} ;                        // Set exit directions for hanger bay
         Room[] hangerBayExitDestinations = {controlroom, office};                          // Set exit directions and destinations for hanger bay
         String[] hangerBayItems = {"Tie-Fighter", "Mouse-Droid"};                         // Set items in hanger bay
@@ -200,17 +201,17 @@ public class RoomAdventure {                                           // Main c
         maintenance.setGrabbables(maintenanceGrabbables);                       // Set grabbables for maintenance
 
         // Armory
-        String[] armoryExitDirections = {"east"};
-        Room[] armoryExitDestinations = {controlroom};
-        String[] armoryItems = {"blaster"};
-        String[] armoryItemDescriptions = {"A powerful blaster capable of destroying vital systems."};
-        String[] armoryGrabbables = {"blaster"};
+        String[] armoryExitDirections = {"east"};                                                       // Set exit directions for armory
+        Room[] armoryExitDestinations = {controlroom};                                                  // Set exit destinations for armory
+        String[] armoryItems = {"blaster"};                                                             // Set items for Armory
+        String[] armoryItemDescriptions = {"A powerful blaster capable of destroying vital systems."};  // Set ItemDescriptions for armory
+        String[] armoryGrabbables = {"blaster"};                                                        // Set Grabbables for armory
 
-        armory.setExitDirections(armoryExitDirections);
-        armory.setExitDestinations(armoryExitDestinations);
-        armory.setItems(armoryItems);
-        armory.setItemDescriptions(armoryItemDescriptions);
-        armory.setGrabbables(armoryGrabbables);
+        armory.setExitDirections(armoryExitDirections);                                                 // Set exit directions for armory
+        armory.setExitDestinations(armoryExitDestinations);                                             // Set exit destinations for armory
+        armory.setItems(armoryItems);                                                                   // Set items for Armory
+        armory.setItemDescriptions(armoryItemDescriptions);                                             // Set ItemDescriptions for armory
+        armory.setGrabbables(armoryGrabbables);                                                         // Set Grabbables for armory
 
         // Set up the game
         currentRoom = hangerBay;                                          
@@ -251,6 +252,7 @@ public class RoomAdventure {                                           // Main c
 
             if (words.length != 2) {                                    // Check for proper two-word command
                 status = DEFAULT_STATUS;                                // Set default status if input is not two words
+                System.out.println("\n" + status);
                 continue;
             }
             String verb = words[0];                                     // First word is the verb
@@ -269,8 +271,8 @@ public class RoomAdventure {                                           // Main c
                 case "use":                                             // If verb is "use"
                     handleUse(noun);                                    // Call method to handle using items
                     break;
-                case "quit":
-                    handleQuit(verb);
+                case "quit":                                            // If verb is quit
+                    handleQuit(noun);                                   // Call method to quit game 
                     break;
                 default:                                                // Invalid command
                     status = DEFAULT_STATUS;                            // Set default status for invalid command
@@ -289,7 +291,7 @@ class Room {                            // Represents a game room
     private String[] items;             // Items visible in the room
     private String[] itemDescriptions;  // Descriptions of the items
     private String[] grabbables;        // Items that can be picked up
-    private String[] requiredItems;
+    private String[] requiredItems;     // Required items to leave the room
 
     public Room (String name) {         // Constructor
         this.name = name;               // Set the room name
@@ -298,11 +300,11 @@ class Room {                            // Represents a game room
         return name;                   // Getter for room name
     }
 
-    public String[] getRequiredItems(){
+    public String[] getRequiredItems(){ // Getter for required items
         return this.requiredItems;
     }
 
-    public void setRequiredItems(String[] requiredItems){
+    public void setRequiredItems(String[] requiredItems){       // setter for required items 
         this.requiredItems = requiredItems;
     }
 
