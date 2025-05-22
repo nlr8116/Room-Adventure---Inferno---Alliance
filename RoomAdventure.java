@@ -1,310 +1,265 @@
-import java.util.Scanner;                                               // Import scanner for reading user input
+import java.util.Scanner; // Import Scanner for reading user input
 
-public class RoomAdventure {                                           // Main class containing game logic
+public class RoomAdventure { // Main class containing game logic
 
     // class variables
-    private static Room currentRoom;                                    // The room the player is currently in
+    private static Room currentRoom; // The room the player is currently in
     private static String[] inventory = {null, null, null, null, null}; // Player inventory slots
-    private static String status;                                       // Message to display after each selection 
-    private static long Time(){
-        return System.currentTimeMillis() / 1000 / 60 ;                              // Returns the current time in milliseconds
-    }
-    private static long endTime = Time() + 5;                               // Timer to track game time
-    
-    // constants
-    final private static String DEFAULT_STATUS =                        
-    // Default error message
-    "Sorry, I do not understand, Try [verb] [noun]. Valid verbs include  'go', 'look', and 'take'.";
+    private static String status; // Message to display after each action
+    private static boolean isRunning = true; // Controls game loop
 
-    public static int findElement(String[] list, String element){
-        if(list == null){
-            return -1;
-        }
-        
-        for (int i = 0; i < list.length; i++) {                       // Loop through the list
-            if (list[i] != null && list[i].equals(element)) {          // Check if element matches
-                return i;                                              // Return index if found
-            }
-        }
-        return -1;                                                     // Return -1 if not found
-    }
+
+    // constants
+    final private static String DEFAULT_STATUS =
+        "Sorry, I do not understand. Try [verb] [noun]. Valid verbs include 'go', 'look', 'quit game', and 'take'."; // Default error message
+
+
 
     private static void handleGo(String noun) {
-        String[] exitDirections = currentRoom.getExitDirections();      // Get available exit directions
-        Room[] exitDestinations = currentRoom.getExitDestinations();    // Get corresponding room objects  
-        status = "I don't see that room.";                              // Default if direction not found
-        for (int i = 0; i < exitDirections.length; i++) {               // Loop through exit directions
-            if (noun.equals(exitDirections[i])) {                    // if direction matches
-                if(exitDestinations[i].getName() == "Power Core" && findElement(inventory, "ID-Card") == -1){ // If trying to enter the power core without the ID card then they are locked out
-                    status = "You do not have the ID card Required to enter the Power Core.";
-                    break;
+        String[] exitDirections = currentRoom.getExitDirections();
+        Room[] exitDestinations = currentRoom.getExitDestinations();
+        String[] requiredItems = currentRoom.getRequiredItems();
+        status = "I don't see that room.";
+        for (int i = 0; i < exitDirections.length; i++) {
+            if (noun.equals(exitDirections[i])) {
+
+                // Check if this direction requires an item
+                if (requiredItems != null && requiredItems[i] != null) {
+                    String requiredItem = requiredItems[i];
+                    boolean hasItem = false;
+
+                    for (String item : inventory) {
+                        if (requiredItem.equals(item)) {
+                            hasItem = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasItem) {
+                        status = "You need the " + requiredItem + " to go " + noun + ".";
+                        return; // Don't allow movement
+                    }
                 }
-                currentRoom = exitDestinations[i];                      // Move to the new room
-                status = "Changed Room";                                // Update status 
+
+                currentRoom = exitDestinations[i];
+                status = "You moved to a new room.";
+                return;
             }
         }
     }
 
-    private static void handleLook(String noun) {                       // Handles inspecting items
-        String[] items = currentRoom.getItems();                        // Visible Items in the room
-        String[] itemDescriptions = currentRoom.getItemDescriptions();  // Descriptions of items in the room
-        status = "I don't see that item.";                              // Default if item not found
-        for (int i = 0; i < items.length; i++) {                        // Loop through items
-            if (noun.equals(items[i])) {                                // if user noun matches an item
-                status = itemDescriptions[i];                           // Update status with item description
+
+    private static void handleLook(String noun) { // Handles inspecting items
+        String[] items = currentRoom.getItems(); // Visible items in current room
+        String[] itemDescriptions = currentRoom.getItemDescriptions(); // Descriptions for each item
+        status = "I don't see that item."; // Default if item not found
+        for (int i = 0; i < items.length; i++) { // Loop through items
+            if (noun.equals(items[i])) { // If user-noun matches an item
+                status = itemDescriptions[i]; // Set status to item description
             }
         }
     }
 
-    private static void handleTake(String noun) {                       // Handles picking up items
-        String[] grabbables = currentRoom.getGrabbables();              // Items that can be picked up
-        status = "I can't grab that.";                                  // Default if not grabbable
-        for (String item : grabbables) {                                // Loop through grabbables
-            if (noun.equals(item)) {                                    // If user noun matches a grabbable item
-                if(item == "Death-Star-Plans" && findElement(inventory, "Maintenance-Tools") == -1){ // If trying to take the death star plans without the maintenance tools then they are blocked
-                    status = "You do not have the Tools Required to take the Death Star Plans.";
-                    break;
-                }
-                for (int j = 0; j < inventory.length; j++) {            // Loop through inventory
-                    if (inventory[j] == null) {                         // If empty slot found
-                        inventory[j] = item;                            // Add item to inventory
-                        status = "Item added to inventory.";            // Update status
-                        break;                                          // Exit loop
+    private static void handleTake(String noun) { // Handles picking up items
+        String[] grabbables = currentRoom.getGrabbables(); // Items that can be taken
+        status = "I can't grab that."; // Default if not grabbable
+        for (String item : grabbables) { // Loop through grabbable items
+            if (noun.equals(item)) { // If user-noun matches grabbable
+                for (int j = 0; j < inventory.length; j++) { // Find empty inventory slot
+                    if (inventory[j] == null) { // If slot is empty
+                        inventory[j] = noun; // Add item to inventory
+                        status = "Added it to the inventory"; // Update status
+                        break; // Exit inventory loop
                     }
                 }
             }
         }
     }
-    private static void handleUse(String noun) {
-    if (noun.equals("blaster") && findElement(inventory, "blaster") != -1) {
-        if (currentRoom.getName().equals("Power Core")) {
-            System.out.println("\nYou raise your blaster and fire directly into the Power Core...");
-            System.out.println("The core destabilizes. Warning sirens blare.");
-            System.out.println("As explosions erupt around you, you smile knowing the Death Star will fall.");
-            System.out.println("\nCUTSCENE: You sacrificed your life to destroy the Death Star.");
-            System.out.println("The rebels pick up the debris and cheer your bravery.\n");
-            System.out.println("GAME OVER - SACRIFICE ENDING");
-            System.exit(0); // Ends the game
-        } else {
-            status = "You can only use the blaster in the Power Core.";
-        }
-    } else {
-        status = "You can't use that item.";
-        }
+
+    private static void handleQuit(String verb){
+        System.out.println("Goodbye");
+        isRunning = false;
     }
 
+    
 
-    private static void setupGame(){
-        // Hanger Bay
-        Room hangerBay = new Room("Hanger Bay");                            // Create hanger bay
-        Room controlroom = new Room("Control Room");                            // Create control room
-        Room powercore = new Room("Power Core");                            // Create power core
-        Room maintenance = new Room("Maintenance");                       // Create maintenance room
-        Room armory = new Room("Armory");                                 // Create armory room
+    private static void setupGame() { // Initializes game world
+        Room room1 = new Room("Room 1"); // Create Room 1
+        Room room2 = new Room("Room 2"); // Create Room 2
+        Room lockedRoom = new Room("Locked Room");
 
-        String[] hangerBayExitDirections = {"north"} ;                        // Set exit directions for hanger bay
-        Room[] hangerBayExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
-        String[] hangerBayItems = {"Tie-Fighter", "Mouse-Droid"};                         // Set items in hanger bay
-        String[] hangerBayItemDescriptions = {                               // Set item descriptions for hanger bay
-            "An Imperial Tie Fighter, might be good on the way out.", "A small mouse droid."
-        }; 
-        String[] hangerBayGrabbables = {"blaster"};                             // Set grabbables for hanger bay
-        hangerBay.setExitDirections(hangerBayExitDirections);                   // Set exit directions for hanger bay
-        hangerBay.setExitDestinations(hangerBayExitDestinations);               // Set exit destinations for hanger bay
-        hangerBay.setItems(hangerBayItems);                                     // Set items for hanger bay
-        hangerBay.setItemDescriptions(hangerBayItemDescriptions);               // Set item descriptions for hanger bay
-        hangerBay.setGrabbables(hangerBayGrabbables);                           // Set grabbables for hanger bay
 
-        // Control Room
-        String[] controlroomExitDirections = {"north", "east", "south", "west"};                        // Set exit directions for control room
-        Room[] controlroomExitDestinations = {powercore, maintenance, hangerBay, armory};                         // Set exit directions and destinations for control room
-        String[] controlroomItems = {"Computer-Terminals", "ID-Card", "Targeting-Screens"};             // Set items in control room
-        String[] controlroomItemDescriptions = {                              // Set item descriptions for control room
-            "A large terminal that controls the Death Star.", "An ID card that gets you into the Powercore", "A targeting screen that shows the Death Star's target."
+        // Room 1
+        String[] room1ExitDirections = {"east", "north"};
+        Room[] room1ExitDestinations = {room2, lockedRoom};
+        String[] room1RequiredItems = {"lightsaber", "keycard"}; // <-- key required for 'north', lightsaber for east
+        String[] room1Items = {"chair", "desk"};
+        String[] room1ItemDescriptions = {
+            "It is a chair",
+            "It's a desk, there is a keycard on it."
         };
-        String[] controlroomGrabbables = {"ID-Card"};                               // Set grabbables for control room
-        controlroom.setExitDirections(controlroomExitDirections);                   // Set exit directions for control room
-        controlroom.setExitDestinations(controlroomExitDestinations);               // Set exit destinations for control room
-        controlroom.setItems(controlroomItems);                                     // Set items for control room
-        controlroom.setItemDescriptions(controlroomItemDescriptions);               // Set item descriptions for control room
-        controlroom.setGrabbables(controlroomGrabbables);                           // Set grabbables for control room
+        String[] room1Grabbables = {"keycard"};
 
-        // Power Core
-        String[] powercoreExitDirections = {"south"};                        // Set exit directions for power core
-        Room[] powercoreExitDestinations = {controlroom};                         // Set exit directions and destinations for power core
-        String[] powercoreItems = {"Power-Core", "Death-Star-Plans"};             // Set items in power core       
-        String[] powercoreItemDescriptions = {                              // Set item descriptions for power core
-            "The power core of the Death Star.", "The plans to destroy the Death Star. can be stolen with the proper tools"
+        room1.setExitDirections(room1ExitDirections);
+        room1.setExitDestinations(room1ExitDestinations);
+        room1.setRequiredItems(room1RequiredItems);
+        room1.setItems(room1Items);
+        room1.setItemDescriptions(room1ItemDescriptions);
+        room1.setGrabbables(room1Grabbables);
+
+        String[] room2ExitDirections = {"west"}; // Room 2 exits
+        Room[] room2ExitDestinations = {room1}; // Destination rooms for Room 2
+        String[] room2Items = {"Holotable", "desk"}; // Items in Room 2
+        String[] room2ItemDescriptions = { // Descriptions for Room 2 items
+            "It's displaying a schematic of the Death Star",
+            "There is a com-link on the desk. I can use it to contact the Rebel Fleet."
         };
+        String[] room2Grabbables = {"com-link"}; // Items you can take in Room 2
+        room2.setExitDirections(room2ExitDirections); // Set exits
+        room2.setExitDestinations(room2ExitDestinations); // Set exit destinations
+        room2.setItems(room2Items); // Set visible items
+        room2.setItemDescriptions(room2ItemDescriptions); // Set item descriptions
+        room2.setGrabbables(room2Grabbables); // Set grabbable items
 
-        String[] powercoreGrabbables = {"Death-Star-Plans"};                    // Set grabbables for power core
-        powercore.setExitDirections(powercoreExitDirections);                   // Set exit directions for power core
-        powercore.setExitDestinations(powercoreExitDestinations);               // Set exit destinations for power core
-        powercore.setItems(powercoreItems);                                     // Set items for power core
-        powercore.setItemDescriptions(powercoreItemDescriptions);               // Set item descriptions for power core
-        powercore.setGrabbables(powercoreGrabbables);                           // Set grabbables for power core
-        
-        // Maintenance
-        String[] maintenanceExitDirections = {"west"};                          // Set exit directions for maintenance
-        Room[] maintenanceExitDestinations = {controlroom};                     // Set exit directions and destinations for maintenance
-        String[] maintenanceItems = {"Maintenance-Droids", "Maintenance-Tools"};// Set items in maintenance
-        String[] maintenanceItemDescriptions = {                                // Set item descriptions for maintenance
-            "A group of maintenance droids.", "A set of tools for repairing or destroying the Death Star."
+        String[] lockedRoomExitDirections = {"south"};
+        Room[] lockedRoomExitDestinations = {room1};
+        String[] lockedRoomItems = {"chest"};
+        String[] lockedRoomItemDescriptions = {
+            "It's a heavy wooden chest with a Jedi emblem. There's a lightsaber inside."
         };
-        String[] maintenanceGrabbables = {"Maintenance-Tools"};                 // Set grabbables for maintenance
-        maintenance.setExitDirections(maintenanceExitDirections);               // Set exit directions for maintenance
-        maintenance.setExitDestinations(maintenanceExitDestinations);           // Set exit destinations for maintenance
-        maintenance.setItems(maintenanceItems);                                 // Set items for maintenance
-        maintenance.setItemDescriptions(maintenanceItemDescriptions);           // Set item descriptions for maintenance
-        maintenance.setGrabbables(maintenanceGrabbables);                       // Set grabbables for maintenance
+        String[] lockedRoomGrabbables = {"lightsaber"};
 
-        // Armory
-        String[] armoryExitDirections = {"east"};
-        Room[] armoryExitDestinations = {controlroom};
-        String[] armoryItems = {"blaster"};
-        String[] armoryItemDescriptions = {"A powerful blaster capable of destroying vital systems."};
-        String[] armoryGrabbables = {"blaster"};
+        lockedRoom.setExitDirections(lockedRoomExitDirections);
+        lockedRoom.setExitDestinations(lockedRoomExitDestinations);
+        lockedRoom.setItems(lockedRoomItems);
+        lockedRoom.setItemDescriptions(lockedRoomItemDescriptions);
+        lockedRoom.setGrabbables(lockedRoomGrabbables);
 
-        armory.setExitDirections(armoryExitDirections);
-        armory.setExitDestinations(armoryExitDestinations);
-        armory.setItems(armoryItems);
-        armory.setItemDescriptions(armoryItemDescriptions);
-        armory.setGrabbables(armoryGrabbables);
-
-        // Set up the game
-        currentRoom = hangerBay;                                          
+        currentRoom = room1; // Start game in Room 1
     }
-
+    
     @SuppressWarnings("java:S2189")
-    public static void main(String[] args) {
-        setupGame(); // Initialize game setup
-        System.out.println("Welcome to the Death Star! \nYou have 5 minutes to escape the Death Star with the plans before it blows up your planet. \nYou can go [north], [south], [east], or [west]. \nYou can look at items in the room with 'look [item]'. \nYou can take items with 'take [item]'. You can use a specifc item by typing 'use [item]'. \nWould you like to play with a countdown timer? (y/n)"); // Print welcome message
-        Scanner ts = new Scanner(System.in);
-        String tstring = ts.nextLine();
+    public static void main(String[] args) { // Entry point of the program
+        setupGame(); // Initialize rooms, items, and starting room
 
+        while (isRunning) { // Game loop, runs until program is terminated
+            System.out.print(currentRoom.toString()); // Display current room description
+            System.out.print("Inventory: "); // Prompt for inventory display
 
-
-        while (true) { 
-            if(findElement(inventory, "Death-Star-Plans") != -1 && currentRoom.getName() == "Hanger Bay"){     // If the player has the death star plans are are in the Hanger Bay then they win
-                System.out.println("\nYou have the Death Star Plans! \nYou fly out of the Death Star in a Tie-Fighter with the plans bringing them to the rebels. \nThey band together and go blow up the Death star, defeating the Empire!");
-                break;
-            }
-            if (tstring.equals("y")) { // If the user wants to play with a countdown timer
-                System.out.println((endTime - Time()) + " Minutes remaining"); // Print the current time in minutes
-                if (endTime - Time() <= 0) {                               // If time is up
-                    System.out.println("You have run out of time! The Death Star is ready to blow up your planet.");       // Print game over message
-                    break;                                                  // Exit game loop
-                }
+            for (int i = 0; i < inventory.length; i++) { // Loop through inventory slots
+                System.out.print(inventory[i] + " "); // Print each inventory item
             }
 
-            System.out.print(currentRoom.toString());                   // Print current room
-            System.out.print("\nInventory: ");                        // Print inventory
-            for (int i = 0; i < inventory.length; i++) {                // Loop through inventory slots
-                System.out.print(inventory[i] + " ");                   // Print each item in inventory
+            System.out.println("\nWhat would you like to do? "); // Prompt user for next action
+
+            Scanner s = new Scanner(System.in); // Create Scanner to read input
+            String input = s.nextLine(); // Read entire line of input
+            String[] words = input.split(" "); // Split input into words
+
+            if (words.length != 2) { // Check for proper two-word command
+                status = DEFAULT_STATUS; // Set status to error message
+                continue; // Skip to next loop iteration
             }
-            System.out.println("\nWhat would you like to do? ");      // Prompt for user input
 
-            Scanner s = new Scanner(System.in);                         // Create scanner for user input
-            String input = s.nextLine();                                // Read entire line of input
-            String[] words = input.split(" ");                    // Split input into words
+            String verb = words[0]; // First word is the action verb
+            String noun = words[1]; // Second word is the target noun
 
-            if (words.length != 2) {                                    // Check for proper two-word command
-                status = DEFAULT_STATUS;                                // Set default status if input is not two words
-                continue;
-            }
-            String verb = words[0];                                     // First word is the verb
-            String noun = words[1];                                     // Second word is the noun
-
-            switch (verb) {                                             // Handle different verbs
-                case "go":                                              // If verb is "go"
-                    handleGo(noun);                                     // Call method to handle movement
+            switch (verb) { // Decide which action to take
+                case "go": // If verb is 'go'
+                    handleGo(noun); // Move to another room
                     break;
-                case "look":                                            // If verb is "look"
-                    handleLook(noun);                                   // Call method to handle looking at items
+                case "look": // If verb is 'look'
+                    handleLook(noun); // Describe an item
                     break;
-                case "take":                                            // If verb is "take"
-                    handleTake(noun);                                   // Call method to handle taking items
+                case "take": // If verb is 'take'
+                    handleTake(noun); // Pick up an item
                     break;
-                case "use":                                             // If verb is "use"
-                    handleUse(noun);                                    // Call method to handle using items
+                case "quit":
+                    handleQuit(verb);
                     break;
-                default:                                                // Invalid command
-                    status = DEFAULT_STATUS;                            // Set default status for invalid command
+                default: // If verb is unrecognized
+                    status = DEFAULT_STATUS; // Set status to error message
             }
 
-            System.out.println("\n" + status);                                 // Print status message
+            System.out.println(status); // Print the status message
         }
     }
 }
 
+class Room { // Represents a game room
+    private String name; // Room name
+    private String[] exitDirections; // Directions you can go
+    private Room[] exitDestinations; // Rooms reached by each direction
+    private String[] items; // Items visible in the room
+    private String[] itemDescriptions; // Descriptions for those items
+    private String[] grabbables; // Items you can take
+    private String[] requiredItems; // Items required to use each exit (null if no requirement)
 
-class Room {                            // Represents a game room
-    private String name;                // Name of the room
-    private String[] exitDirections;    // Directions to other rooms
-    private Room[] exitDestinations;    // Rooms corresponding to the exit directions
-    private String[] items;             // Items visible in the room
-    private String[] itemDescriptions;  // Descriptions of the items
-    private String[] grabbables;        // Items that can be picked up
 
-    public Room (String name) {         // Constructor
-        this.name = name;               // Set the room name
-    }
-    public String getName() {
-        return name;                   // Getter for room name
+    public Room(String name) { // Constructor
+        this.name = name; // Set the room's name
     }
 
-    public void setExitDirections(String[] exitDirections) {    // Setter for exits
-        this.exitDirections = exitDirections; 
+    public void setExitDirections(String[] exitDirections) { // Setter for exits
+        this.exitDirections = exitDirections;
     }
 
-    public String[] getExitDirections() {                       // Getter for exits
-        return exitDirections; 
+    public String[] getExitDirections() { // Getter for exits
+        return exitDirections;
     }
 
-    public void setExitDestinations(Room[] exitDestinations) {  // Setter for exit destinations
-        this.exitDestinations = exitDestinations; 
+    public void setExitDestinations(Room[] exitDestinations) { // Setter for exit destinations
+        this.exitDestinations = exitDestinations;
     }
 
-    public Room[] getExitDestinations() {                       // Getter for exit destinations
-        return exitDestinations; 
+    public Room[] getExitDestinations() { // Getter for exit destinations
+        return exitDestinations;
     }
 
-    public void setItems(String[] items) {                      // Setter for items
-        this.items = items; 
+    public void setItems(String[] items) { // Setter for items
+        this.items = items;
     }
 
-    public String[] getItems() {                                // Getter for items
-        return items; 
+    public String[] getItems() { // Getter for items
+        return items;
     }
 
-    public void setItemDescriptions(String[] itemDescriptions) { // Setter for item descriptions
-        this.itemDescriptions = itemDescriptions; 
+    public void setItemDescriptions(String[] itemDescriptions) { // Setter for descriptions
+        this.itemDescriptions = itemDescriptions;
     }
 
-    public String[] getItemDescriptions() {                     // Getter for item descriptions
-        return itemDescriptions; 
+    public String[] getItemDescriptions() { // Getter for descriptions
+        return itemDescriptions;
     }
 
-    public void setGrabbables(String[] grabbables) {            // Setter for grabbables
-        this.grabbables = grabbables; 
+    public void setGrabbables(String[] grabbables) { // Setter for grabbable items
+        this.grabbables = grabbables;
     }
 
-    public String[] getGrabbables() {                           // Getter for grabbables
-        return grabbables; 
+    public String[] getGrabbables() { // Getter for grabbable items
+        return grabbables;
     }
+
+    public void setRequiredItems(String[] requiredItems) {
+    this.requiredItems = requiredItems;
+}
+
+public String[] getRequiredItems() {
+    return requiredItems;
+}
+
 
     @Override
-    public String toString() {                      // Custom print for the room
-        String result = "\nLocation: " + name;      // Show room name
-        result += "\nYou See: ";                    // List items
-        for (String item : items) {                 // Loop items
-            result += "\n" + item;                  // Append each item
+    public String toString() { // Custom print for the room
+        String result = "\nLocation: " + name; // Show room name
+        result += "\nYou See: "; // List items
+        for (String item : items) { // Loop items
+            result += item + " "; // Append each item
         }
-        result += "\nExits: ";                      // List exits
-        for (String direction : exitDirections) {   // Loop exits
-            result += direction + " ";              // Append each exit direction
-
+        result += "\nExits: "; // List exits
+        for (String direction : exitDirections) { // Loop exits
+            result += direction + " "; // Append each direction
         }
-        return result + "\n";                       // Return full description
+        return result + "\n"; // Return full description
     }
 }
