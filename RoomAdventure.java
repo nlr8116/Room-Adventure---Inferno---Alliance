@@ -5,7 +5,8 @@ public class RoomAdventure {                                           // Main c
     // class variables
     private static Room currentRoom;                                    // The room the player is currently in
     private static String[] inventory = {null, null, null, null, null}; // Player inventory slots
-    private static String status;                                       // Message to display after each selection 
+    private static String status;
+    private static Boolean isRunning = true;                                       // Message to display after each selection 
     private static long Time(){
         return System.currentTimeMillis() / 1000 / 60 ;                              // Returns the current time in milliseconds
     }
@@ -32,9 +33,26 @@ public class RoomAdventure {                                           // Main c
     private static void handleGo(String noun) {
         String[] exitDirections = currentRoom.getExitDirections();      // Get available exit directions
         Room[] exitDestinations = currentRoom.getExitDestinations();    // Get corresponding room objects  
+        String[] requiredItems = currentRoom.getRequiredItems(); 
         status = "I don't see that room.";                              // Default if direction not found
         for (int i = 0; i < exitDirections.length; i++) {               // Loop through exit directions
             if (noun.equals(exitDirections[i])) {                    // if direction matches
+                if (requiredItems != null && requiredItems[i] != null) {
+                    String requiredItem = requiredItems[i];
+                    boolean hasItem = false;
+
+                    for (String item : inventory) {
+                        if (requiredItem.equals(item)) {
+                            hasItem = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasItem) {
+                        status = "You need the " + requiredItem + " to go " + noun + ".";
+                        return; // Don't allow movement
+                    }
+                }
                 if(exitDestinations[i].getName() == "Power Core" && findElement(inventory, "ID-Card") == -1){ // If trying to enter the power core without the ID card then they are locked out
                     status = "You do not have the ID card Required to enter the Power Core.";
                     break;
@@ -75,6 +93,12 @@ public class RoomAdventure {                                           // Main c
             }
         }
     }
+
+    private static void handleQuit(String verb){
+        System.out.println("Goodbye");
+        isRunning = false;
+    }
+
     private static void handleUse(String noun) {
     if (noun.equals("blaster") && findElement(inventory, "blaster") != -1) {
         if (currentRoom.getName().equals("Power Core")) {
@@ -95,6 +119,7 @@ public class RoomAdventure {                                           // Main c
 
 
     private static void setupGame(){
+        Room office = new Room("Moff's Office");
         // Hanger Bay
         Room hangerBay = new Room("Hanger Bay");                            // Create hanger bay
         Room controlroom = new Room("Control Room");                            // Create control room
@@ -102,8 +127,24 @@ public class RoomAdventure {                                           // Main c
         Room maintenance = new Room("Maintenance");                       // Create maintenance room
         Room armory = new Room("Armory");                                 // Create armory room
 
-        String[] hangerBayExitDirections = {"north"} ;                        // Set exit directions for hanger bay
-        Room[] hangerBayExitDestinations = {controlroom};                          // Set exit directions and destinations for hanger bay
+        String[] officeExitDirections = {"west"};
+        Room[] officeExitDestinations = {hangerBay};
+        String[] officrequiredItems = {"key-card", "com-link"};
+        String[] officeItems = {"desk", "chair"};
+        String[] officeItemDecriptions = {
+            "A Key-card on the Desk. It gives access to the hangar bay", "A Com-link on the Chair. I can contact the Rebel Fleet!"
+        };
+        String[] officeGrabbables = {"key-card", "com-link"};
+        
+        office.setExitDirections(officeExitDirections);
+        office.setExitDestinations(officeExitDestinations);
+        office.setRequiredItems(officrequiredItems);
+        office.setItems(officeItems);
+        office.setItemDescriptions(officeItemDecriptions);
+        office.setGrabbables(officeGrabbables);
+
+        String[] hangerBayExitDirections = {"north", "east"} ;                        // Set exit directions for hanger bay
+        Room[] hangerBayExitDestinations = {controlroom, office};                          // Set exit directions and destinations for hanger bay
         String[] hangerBayItems = {"Tie-Fighter", "Mouse-Droid"};                         // Set items in hanger bay
         String[] hangerBayItemDescriptions = {                               // Set item descriptions for hanger bay
             "An Imperial Tie Fighter, might be good on the way out.", "A small mouse droid."
@@ -184,7 +225,7 @@ public class RoomAdventure {                                           // Main c
 
 
 
-        while (true) { 
+        while (isRunning) { 
             if(findElement(inventory, "Death-Star-Plans") != -1 && currentRoom.getName() == "Hanger Bay"){     // If the player has the death star plans are are in the Hanger Bay then they win
                 System.out.println("\nYou have the Death Star Plans! \nYou fly out of the Death Star in a Tie-Fighter with the plans bringing them to the rebels. \nThey band together and go blow up the Death star, defeating the Empire!");
                 break;
@@ -228,6 +269,9 @@ public class RoomAdventure {                                           // Main c
                 case "use":                                             // If verb is "use"
                     handleUse(noun);                                    // Call method to handle using items
                     break;
+                case "quit":
+                    handleQuit(verb);
+                    break;
                 default:                                                // Invalid command
                     status = DEFAULT_STATUS;                            // Set default status for invalid command
             }
@@ -245,12 +289,21 @@ class Room {                            // Represents a game room
     private String[] items;             // Items visible in the room
     private String[] itemDescriptions;  // Descriptions of the items
     private String[] grabbables;        // Items that can be picked up
+    private String[] requiredItems;
 
     public Room (String name) {         // Constructor
         this.name = name;               // Set the room name
     }
     public String getName() {
         return name;                   // Getter for room name
+    }
+
+    public String[] getRequiredItems(){
+        return this.requiredItems;
+    }
+
+    public void setRequiredItems(String[] requiredItems){
+        this.requiredItems = requiredItems;
     }
 
     public void setExitDirections(String[] exitDirections) {    // Setter for exits
